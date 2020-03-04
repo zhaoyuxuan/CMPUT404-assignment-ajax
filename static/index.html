@@ -28,15 +28,21 @@
         var W = canvas.width = window.innerWidth - 6;
         var H = canvas.height = window.innerHeight - 50;
 
+        function updateWorld(data) {
+            world = data;
+            drawNextFrame();
+        }
 
         function sendJSONXMLHTTPRequest(url, objects, callback) {
             var xhr = new XMLHttpRequest();
+
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4) {
                     try {
                         if (xhr.status == 200) {
-                            //XXX: parse some JSON from the request!
-                            //XXX: Pass the data to the callback!
+                            if (callback) {
+                                callback(JSON.parse(xhr.response));
+                            }
                         }
                     }
                     catch (e) {
@@ -47,6 +53,14 @@
             //XXX: POST to a URL
             //XXX: set the mimetype and the accept headers!
             // Remember to use application/json !
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Accept","application/json");
+
+            if (objects) {
+                xhr.send(JSON.stringify(objects));
+            } else{
+                xhr.send();
+            }
         }
 
 
@@ -133,7 +147,10 @@
 
         function addEntity(entity, data) {
             world[entity] = data;
-            drawNextFrame(); // (but should we?)
+            drawNextFrame(); 
+            console.log("before request");
+            sendJSONXMLHTTPRequest("/entity/"+entity, data, null)
+            console.log("after request");
             //XXX: Send a XHTML Request that updates the entity you just  modified!
 
         }
@@ -261,6 +278,7 @@
 
         function update() {
             //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
+            sendJSONXMLHTTPRequest("/world", null, updateWorld);
             drawFrame();
         }
 

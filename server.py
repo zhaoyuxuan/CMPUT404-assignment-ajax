@@ -84,7 +84,7 @@ def hello():
 
 @app.route("/entity/<entity>", methods=['POST', 'PUT'])
 def update(entity):
-    request_data = json.loads(request.data)
+    request_data = request.get_json(force=True)
 
     if request.method == "PUT":
         for key in request_data:
